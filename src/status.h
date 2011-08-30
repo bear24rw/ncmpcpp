@@ -46,6 +46,9 @@ void ShowMessage(const char *, ...) GNUC_PRINTF(1, 2);
 
 void StatusbarMPDCallback();
 void StatusbarGetStringHelper(const std::wstring &);
+void StatusbarApplyFindForwardImmediately(const std::wstring &);
+void StatusbarApplyFindBackwardImmediately(const std::wstring &);
+void StatusbarApplyFindImmediately(const std::wstring &, int);
 void StatusbarApplyFilterImmediately(const std::wstring &);
 
 #endif

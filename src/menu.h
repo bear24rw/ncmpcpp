@@ -96,6 +96,8 @@ namespace NCurses
 			/// @see Menu::isFiltered()
 			///
 			virtual bool isFiltered() = 0;
+
+			size_t oldchoice;
 	};
 	
 	/// This template class is generic menu, that has holds
