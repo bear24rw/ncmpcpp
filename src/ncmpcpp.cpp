@@ -1995,8 +1995,16 @@ int main(int argc, char *argv[])
 			
 			if (mList)
 			{
+				mList->oldChoice = mList->Choice();
+
 				LockStatusbar();
 				Statusbar() << "Find " << (Keypressed(input, Key.FindForward) ? "forward" : "backward") << ": ";
+
+				if (Keypressed(input, Key.FindForward))
+					wFooter->SetGetStringHelper(StatusbarApplyFindForwardImmediately);
+				else
+					wFooter->SetGetStringHelper(StatusbarApplyFindBackwardImmediately);
+
 				std::string findme = wFooter->GetString();
 				UnlockStatusbar();
 				myPlaylist->UpdateTimer();
@@ -2010,11 +2018,6 @@ int main(int argc, char *argv[])
 					continue;
 				
 				success ? ShowMessage("Searching finished!") : ShowMessage("Unable to find \"%s\"", findme.c_str());
-				
-				if (Keypressed(input, Key.FindForward))
-					mList->NextFound(Config.wrapped_search);
-				else
-					mList->PrevFound(Config.wrapped_search);
 				
 				if (myScreen == myPlaylist)
 					myPlaylist->EnableHighlighting();

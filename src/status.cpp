@@ -80,6 +80,39 @@ void StatusbarGetStringHelper(const std::wstring &)
 {
 	TraceMpdStatus();
 }
+void StatusbarApplyFindForwardImmediately(const std::wstring &ws)
+{
+	StatusbarApplyFindImmediately(ws, 1);
+}
+
+void StatusbarApplyFindBackwardImmediately(const std::wstring &ws)
+{
+	StatusbarApplyFindImmediately(ws, 0);
+}
+
+void StatusbarApplyFindImmediately(const std::wstring &ws, int direction)
+{
+	static std::wstring cmp;
+	if (cmp != ws)
+	{
+		List *mList = myScreen->GetList();
+
+		bool success = mList->Search(ToString((cmp = ws)), myScreen == mySearcher ? SearchEngine::StaticOptions : 0, REG_ICASE | Config.regex_type);
+
+		mList->Highlight(mList->oldChoice);
+
+		if (success)
+		{
+			if (direction)
+				mList->NextFound(Config.wrapped_search);
+			else
+				mList->PrevFound(Config.wrapped_search);
+		}
+
+		myScreen->RefreshWindow();
+	}
+	TraceMpdStatus();
+}
 
 void StatusbarApplyFilterImmediately(const std::wstring &ws)
 {
