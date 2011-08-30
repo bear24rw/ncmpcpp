@@ -97,7 +97,7 @@ namespace NCurses
 			///
 			virtual bool isFiltered() = 0;
 
-			size_t oldchoice;
+			size_t oldChoice;
 	};
 	
 	/// This template class is generic menu, that has holds
