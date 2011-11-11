@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2010 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2011 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -251,6 +251,7 @@ void NcmpcppKeys::SetDefaults()
 	ToggleInterface[0] = '\\';
 	ToggleSeparatorsInPlaylist[0] = '!';
 	ToggleLyricsDB[0] = 'L';
+	ToggleFetchingLyricsInBackground[0] = 'F';
 	GoToParentDir[0] = KEY_BACKSPACE;
 	SwitchTagTypeList[0] = '`';
 	Quit[0] = 'q';
@@ -339,6 +340,7 @@ void NcmpcppKeys::SetDefaults()
 	ToggleInterface[1] = NullKey;
 	ToggleSeparatorsInPlaylist[1] = NullKey;
 	ToggleLyricsDB[1] = NullKey;
+	ToggleFetchingLyricsInBackground[1] = NullKey;
 	GoToParentDir[1] = 127;
 	SwitchTagTypeList[1] = NullKey;
 	Quit[1] = 'Q';
@@ -404,6 +406,7 @@ void NcmpcppConfig::SetDefaults()
 	albums_in_tag_editor = false;
 	incremental_seeking = true;
 	now_playing_lyrics = false;
+	fetch_lyrics_in_background = false;
 	local_browser_show_hidden_files = false;
 	search_in_db = true;
 	display_screens_numbers_on_start = true;
@@ -423,6 +426,7 @@ void NcmpcppConfig::SetDefaults()
 	mouse_list_scroll_whole_page = true;
 	new_design = false;
 	visualizer_use_wave = true;
+	visualizer_in_stereo = false;
 	browser_sort_by_mtime = false;
 	tag_editor_extended_numeration = false;
 	media_library_display_date = true;
@@ -628,6 +632,8 @@ void NcmpcppKeys::Read()
 				GetKeys(key, ToggleSeparatorsInPlaylist);
 			else if (key.find("key_toggle_lyrics_db ") != std::string::npos)
 				GetKeys(key, ToggleLyricsDB);
+			else if (key.find("key_toggle_fetching_lyrics_for_current_song_in_background ") != std::string::npos)
+				GetKeys(key, ToggleFetchingLyricsInBackground);
 			else if (key.find("key_go_to_containing_directory ") != std::string::npos)
 				GetKeys(key, GoToContainingDir);
 			else if (key.find("key_go_to_media_library ") != std::string::npos)
@@ -987,6 +993,10 @@ void NcmpcppConfig::Read()
 			{
 				now_playing_lyrics = v == "yes";
 			}
+			else if (cl.find("fetch_lyrics_for_current_song_in_background") != std::string::npos)
+			{
+				fetch_lyrics_in_background = v == "yes";
+			}
 			else if (cl.find("ncmpc_like_songs_adding") != std::string::npos)
 			{
 				ncmpc_like_songs_adding = v == "yes";
@@ -1046,6 +1056,10 @@ void NcmpcppConfig::Read()
 			else if (cl.find("visualizer_type") != std::string::npos)
 			{
 				visualizer_use_wave = v == "wave";
+			}
+			else if (cl.find("visualizer_in_stereo") != std::string::npos)
+			{
+				visualizer_in_stereo = v == "yes";
 			}
 			else if (cl.find("mouse_support") != std::string::npos)
 			{

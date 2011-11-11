@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2010 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2011 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -142,6 +142,7 @@ struct NcmpcppKeys
 	int ToggleInterface[2];
 	int ToggleSeparatorsInPlaylist[2];
 	int ToggleLyricsDB[2];
+	int ToggleFetchingLyricsInBackground[2];
 	int GoToParentDir[2];
 	int SwitchTagTypeList[2];
 	int Quit[2];
@@ -227,6 +228,7 @@ struct NcmpcppConfig
 	bool albums_in_tag_editor;
 	bool incremental_seeking;
 	bool now_playing_lyrics;
+	bool fetch_lyrics_in_background;
 	bool local_browser_show_hidden_files;
 	bool search_in_db;
 	bool display_screens_numbers_on_start;
@@ -246,6 +248,7 @@ struct NcmpcppConfig
 	bool mouse_list_scroll_whole_page;
 	bool new_design;
 	bool visualizer_use_wave;
+	bool visualizer_in_stereo;
 	bool browser_sort_by_mtime;
 	bool tag_editor_extended_numeration;
 	bool media_library_display_date;

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2010 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2011 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -80,6 +80,7 @@ void SearchEngine::Resize()
 {
 	w->Resize(COLS, MainHeight);
 	w->MoveTo(0, MainStartY);
+	w->SetTitle(Config.columns_in_search_engine && Config.titles_visibility ? Display::Columns() : "");
 	hasToBeResized = 0;
 }
 

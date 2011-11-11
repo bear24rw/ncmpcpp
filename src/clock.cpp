@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2010 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2011 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -111,8 +111,6 @@ void Clock::Update()
 		myPlaylist->SwitchTo();
 	
 	static timeval past = { 0, 0 };
-	if (Global::Timer.tv_sec <= past.tv_sec)
-		return;
 	gettimeofday(&past, 0);
 	
 	tm *time = localtime(&past.tv_sec);

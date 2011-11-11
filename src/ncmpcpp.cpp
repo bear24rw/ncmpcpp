@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008-2010 by Andrzej Rybczak                            *
+ *   Copyright (C) 2008-2011 by Andrzej Rybczak                            *
  *   electricityispower@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -1286,7 +1286,11 @@ int main(int argc, char *argv[])
 				{
 					static const char lastfm_url[] = "lastfm://";
 					if (path.compare(0, static_strlen(lastfm_url), lastfm_url) == 0
-					||  path.find(".pls", path.length()-4) != std::string::npos)
+					||  path.find(".asx", path.length()-4) != std::string::npos
+					||  path.find(".cue", path.length()-4) != std::string::npos
+					||  path.find(".m3u", path.length()-4) != std::string::npos
+					||  path.find(".pls", path.length()-4) != std::string::npos
+					||  path.find(".xspf", path.length()-5) != std::string::npos)
 						Mpd.LoadPlaylist(path);
 					else
 						Mpd.Add(path);
@@ -1427,6 +1431,11 @@ int main(int argc, char *argv[])
 		else if (Keypressed(input, Key.ToggleLyricsDB))
 		{
 			myLyrics->ToggleFetcher();
+		}
+		else if (Keypressed(input, Key.ToggleFetchingLyricsInBackground))
+		{
+			Config.fetch_lyrics_in_background = !Config.fetch_lyrics_in_background;
+			ShowMessage("Fetching lyrics for currently playing song in background: %s", Config.fetch_lyrics_in_background ? "On" : "Off");
 		}
 #		endif // HAVE_CURL_CURL_H
 		else if (Keypressed(input, Key.ToggleAutoCenter))
