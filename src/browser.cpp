@@ -47,19 +47,13 @@ using MPD::itPlaylist;
 
 Browser *myBrowser = new Browser;
 
-const char *Browser::SupportedExtensions[] =
-{
-	"wma", "asf", "rm", "mp1", "mp2", "mp3",
-	"mp4", "m4a", "flac", "ogg", "wav", "au",
-	"aiff", "aif", "ac3", "aac", "mpc", "it",
-	"mod", "s3m", "xm", "wv", 0
-};
+std::set<std::string> Browser::SupportedExtensions;
 
 void Browser::Init()
 {
 	static Display::ScreenFormat sf = { this, &Config.song_list_format };
 	
-	w = new Menu<MPD::Item>(0, MainStartY, COLS, MainHeight, Config.columns_in_browser && Config.titles_visibility ? Display::Columns() : "", Config.main_color, brNone);
+	w = new Menu<MPD::Item>(0, MainStartY, COLS, MainHeight, Config.columns_in_browser && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, brNone);
 	w->HighlightColor(Config.main_highlight_color);
 	w->CyclicScrolling(Config.use_cyclic_scrolling);
 	w->CenteredCursor(Config.centered_cursor);
@@ -68,19 +62,28 @@ void Browser::Init()
 	w->SetItemDisplayer(Display::Items);
 	w->SetItemDisplayerUserData(&sf);
 	w->SetGetStringFunction(ItemToString);
+	
+	if (SupportedExtensions.empty())
+		Mpd.GetSupportedExtensions(SupportedExtensions);
+	
 	isInitialized = 1;
 }
 
 void Browser::Resize()
 {
-	w->Resize(COLS, MainHeight);
-	w->MoveTo(0, MainStartY);
-	w->SetTitle(Config.columns_in_browser && Config.titles_visibility ? Display::Columns() : "");
+	size_t x_offset, width;
+	GetWindowResizeParams(x_offset, width);
+	w->Resize(width, MainHeight);
+	w->MoveTo(x_offset, MainStartY);
+	w->SetTitle(Config.columns_in_browser && Config.titles_visibility ? Display::Columns(w->GetWidth()) : "");
 	hasToBeResized = 0;
 }
 
 void Browser::SwitchTo()
 {
+	using Global::myLockedScreen;
+	using Global::myInactiveScreen;
+	
 	if (myScreen == this)
 	{
 #		ifndef WIN32
@@ -91,7 +94,10 @@ void Browser::SwitchTo()
 	if (!isInitialized)
 		Init();
 	
-	if (hasToBeResized)
+	if (myLockedScreen)
+		UpdateInactiveScreen(this);
+	
+	if (hasToBeResized || myLockedScreen)
 		Resize();
 	
 	if (isLocal()) // local browser doesn't support sorting by mtime
@@ -108,7 +114,7 @@ void Browser::SwitchTo()
 std::basic_string<my_char_t> Browser::Title()
 {
 	std::basic_string<my_char_t> result = U("Browse: ");
-	result += Scroller(TO_WSTRING(itsBrowsedDir), itsScrollBeginning, w->GetWidth()-result.length()-(Config.new_design ? 2 : Global::VolumeState.length()));
+	result += Scroller(TO_WSTRING(itsBrowsedDir), itsScrollBeginning, COLS-result.length()-(Config.new_design ? 2 : Global::VolumeState.length()));
 	return result;
 }
 
@@ -143,11 +149,11 @@ void Browser::EnterPressed()
 			}
 			else
 			{
-				std::string name = itsBrowsedDir + "/" + item.name;
+				std::string name = item.name;
 				ShowMessage("Loading playlist %s...", name.c_str());
 				locale_to_utf(name);
-				if (Mpd.LoadPlaylist(name))
-					ShowMessage("Playlist loaded.");
+				if (!Mpd.LoadPlaylist(name))
+					ShowMessage("Couldn't load playlist.");
 			}
 			break;
 		}
@@ -205,11 +211,11 @@ void Browser::SpacePressed()
 		}
 		case itPlaylist:
 		{
-			std::string name = itsBrowsedDir == "/" ? item.name : itsBrowsedDir + "/" + item.name;
+			std::string name = item.name;
 			ShowMessage("Loading playlist %s...", name.c_str());
 			locale_to_utf(name);
-			if (Mpd.LoadPlaylist(name))
-				ShowMessage("Playlist loaded.");
+			if (!Mpd.LoadPlaylist(name))
+				ShowMessage("Couldn't load playlist.");
 			break;
 		}
 	}
@@ -322,11 +328,7 @@ bool Browser::hasSupportedExtension(const std::string &file)
 	
 	std::string ext = file.substr(last_dot+1);
 	ToLower(ext);
-	for (int i = 0; SupportedExtensions[i]; ++i)
-		if (strcmp(ext.c_str(), SupportedExtensions[i]) == 0)
-			return true;
-	
-	return false;
+	return SupportedExtensions.find(ext) != SupportedExtensions.end();
 }
 
 void Browser::LocateSong(const MPD::Song &s)
@@ -530,7 +532,9 @@ void Browser::ChangeBrowseMode()
 	
 	itsBrowseLocally = !itsBrowseLocally;
 	ShowMessage("Browse mode: %s", itsBrowseLocally ? "Local filesystem" : "MPD music dir");
-	itsBrowsedDir = itsBrowseLocally ? home_path : "/";
+	itsBrowsedDir = itsBrowseLocally ? Config.GetHomeDirectory() : "/";
+	if (itsBrowseLocally && *itsBrowsedDir.rbegin() == '/')
+		itsBrowsedDir.resize(itsBrowsedDir.length()-1);
 	w->Reset();
 	GetDirectory(itsBrowsedDir);
 	RedrawHeader = 1;

@@ -3,6 +3,25 @@
 ## ~/.ncmpcpp/config and set up your preferences  ##
 ####################################################
 #
+##### directories ######
+##
+## Directory for storing ncmpcpp related files.
+## Changing it is useful if you want to store
+## everything somewhere else and provide command
+## line setting for alternative location to config
+## file which defines that while launching ncmpcpp.
+##
+#
+#ncmpcpp_directory = "~/.ncmpcpp"
+#
+##
+## Directory for storing downloaded lyrics. It
+## defaults to ~/.lyrics since other MPD clients
+## (eg. ncmpc) also use that location.
+##
+#
+#lyrics_directory = "~/.lyrics"
+#
 ##### connection settings #####
 #
 ## set it in order to make tag editor and renaming files work properly
@@ -69,6 +88,8 @@
 ##
 #
 #visualizer_type = "wave" (spectrum/wave)
+#
+#visualizer_look = "◆│"
 #
 ##### system encoding #####
 ##
@@ -258,6 +279,8 @@
 #
 #search_engine_display_mode = "classic" (classic/columns)
 #
+#playlist_editor_display_mode = "classic" (classic/columns)
+#
 #discard_colors_if_item_is_selected = "yes"
 #
 #incremental_seeking = "yes"
@@ -347,6 +370,15 @@
 ## playlist, visualizer and media library screens.
 ##
 #screen_switcher_mode = "sequence: 2 -> 3"
+#
+##
+## Default width of locked screen (in %).
+## Acceptable values are from 20 to 80.
+##
+#
+#locked_screen_width_part = "50"
+#
+#ask_for_locked_screen_width_part = "yes"
 #
 ##
 ## Note: You can define startup screen for ncmpcpp

@@ -41,6 +41,8 @@
 #include "visualizer.h"
 
 using Global::myScreen;
+using Global::myLockedScreen;
+using Global::myInactiveScreen;
 using Global::wFooter;
 using Global::Timer;
 using Global::wHeader;
@@ -189,9 +191,9 @@ void TraceMpdStatus()
 		Global::UpdateStatusImmediately = 0;
 	}
 	
-	myScreen->Update();
+	ApplyToVisibleWindows(&BasicScreen::Update);
 	
-	if (myScreen->ActiveWindow() == myPlaylist->Items
+	if (isVisible(myPlaylist) && myPlaylist->ActiveWindow() == myPlaylist->Items
 	&&  Timer.tv_sec == myPlaylist->Timer()+Config.playlist_disable_highlight_delay
 	&&  myPlaylist->Items->isHighlighted()
 	&&  Config.playlist_disable_highlight_delay)
@@ -316,19 +318,19 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 		
 		if (!Global::BlockItemListUpdate)
 		{
-			if (myScreen == myBrowser)
+			if (isVisible(myBrowser))
 			{
 				myBrowser->UpdateItemList();
 			}
-			else if (myScreen == mySearcher)
+			else if (isVisible(mySearcher))
 			{
 				mySearcher->UpdateFoundList();
 			}
-			else if (myScreen == myLibrary)
+			else if (isVisible(myLibrary))
 			{
 				UpdateSongList(myLibrary->Songs);
 			}
-			else if (myScreen == myPlaylistEditor)
+			else if (isVisible(myPlaylistEditor))
 			{
 				UpdateSongList(myPlaylistEditor->Content);
 			}
@@ -338,7 +340,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 	{
 		if (myBrowser->Main())
 		{
-			if (myScreen == myBrowser)
+			if (isVisible(myBrowser))
 				myBrowser->GetDirectory(myBrowser->CurrentDir());
 			else
 				myBrowser->Main()->Clear();
@@ -403,7 +405,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 				else
 					player_state.clear();
 #				ifdef ENABLE_VISUALIZER
-				if (myScreen == myVisualizer)
+				if (isVisible(myVisualizer))
 					myVisualizer->Main()->Clear();
 #				endif // ENABLE_VISUALIZER
 				break;
@@ -445,7 +447,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 			if (Config.autocenter_mode && !myPlaylist->Items->isFiltered())
 				myPlaylist->Items->Highlight(myPlaylist->NowPlaying);
 			
-			if (Config.now_playing_lyrics && myScreen == myLyrics && Global::myOldScreen == myPlaylist)
+			if (Config.now_playing_lyrics && isVisible(myLyrics) && Global::myOldScreen == myPlaylist)
 				myLyrics->ReloadNP = 1;
 		}
 		Playlist::ReloadRemaining = 1;
@@ -483,8 +485,8 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 				}
 				
 				basic_buffer<my_char_t> first, second;
-				String2Buffer(TO_WSTRING(utf_to_locale_cpy(np.toString(Config.new_header_first_line))), first);
-				String2Buffer(TO_WSTRING(utf_to_locale_cpy(np.toString(Config.new_header_second_line))), second);
+				String2Buffer(TO_WSTRING(utf_to_locale_cpy(np.toString(Config.new_header_first_line, "$"))), first);
+				String2Buffer(TO_WSTRING(utf_to_locale_cpy(np.toString(Config.new_header_second_line, "$"))), second);
 				
 				size_t first_len = Window::Length(first.Str());
 				size_t first_margin = (std::max(tracklength.length()+1, VolumeState.length()))*2;
@@ -535,7 +537,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 					tracklength += "]";
 				}
 				basic_buffer<my_char_t> np_song;
-				String2Buffer(TO_WSTRING(utf_to_locale_cpy(np.toString(Config.song_status_format))), np_song);
+				String2Buffer(TO_WSTRING(utf_to_locale_cpy(np.toString(Config.song_status_format, "$"))), np_song);
 				*wFooter << XY(0, 1) << wclrtoeol << player_state << fmtBoldEnd;
 				np_song.Write(*wFooter, playing_song_scroll_begin, wFooter->GetWidth()-player_state.length()-tracklength.length(), U(" ** "));
 				*wFooter << fmtBold << XY(wFooter->GetWidth()-tracklength.length(), 1) << tracklength;
@@ -680,7 +682,7 @@ void NcmpcppStatusChanged(MPD::Connection *, MPD::StatusChanges changed, void *)
 	if (changed.PlayerState || (changed.ElapsedTime && (!Config.new_design || Mpd.GetState() == MPD::psPlay)))
 		wFooter->Refresh();
 	if (changed.Playlist || changed.Database || changed.PlayerState || changed.SongID)
-		myScreen->RefreshWindow();
+		ApplyToVisibleWindows(&BasicScreen::RefreshWindow);
 }
 
 Window &Statusbar()

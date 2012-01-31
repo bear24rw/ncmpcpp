@@ -50,6 +50,8 @@ class Browser : public Screen< Menu<MPD::Item> >
 		
 		virtual List *GetList() { return w; }
 		
+		virtual bool isMergable() { return true; }
+		
 		const std::string &CurrentDir() { return itsBrowsedDir; }
 		
 		bool isLocal() { return itsBrowseLocally; }
@@ -65,12 +67,13 @@ class Browser : public Screen< Menu<MPD::Item> >
 		
 	protected:
 		virtual void Init();
+		virtual bool isLockable() { return true; }
 		
 	private:
 		static bool hasSupportedExtension(const std::string &);
 		static std::string ItemToString(const MPD::Item &, void *);
 		
-		static const char *SupportedExtensions[];
+		static std::set<std::string> SupportedExtensions;
 		
 		bool itsBrowseLocally;
 		size_t itsScrollBeginning;
